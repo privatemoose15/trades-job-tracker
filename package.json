@@ -1,0 +1,8 @@
+{
+  "name": "trades-job-tracker",
+  "private": true,
+  "description": "Tests for the Apps Script logic (no dependencies, Node 18+)",
+  "scripts": {
+    "test": "node --test"
+  }
+}

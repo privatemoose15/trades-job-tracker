@@ -1,0 +1,9 @@
+__pycache__/
+.pytest_cache/
+.venv/
+node_modules/
+service_account.json
+*credentials*.json
+.env
+.clasp.json
+.clasprc.json

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; color: #1e293b; margin: 0; padding: 2px; }
+    label { display: block; margin: 10px 0 4px; font-weight: bold; }
+    input, select, textarea {
+      width: 100%; box-sizing: border-box; padding: 7px; font: inherit;
+      border: 1px solid #cbd5e1; border-radius: 4px; background: #fff;
+    }
+    input:focus, select:focus, textarea:focus { outline: 2px solid #2563eb; border-color: #2563eb; }
+    textarea { height: 58px; resize: vertical; }
+    .pair { display: flex; gap: 10px; }
+    .pair > div { flex: 1; }
+    .buttons { display: flex; gap: 8px; margin-top: 18px; }
+    button { padding: 8px 16px; font: inherit; border-radius: 4px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; }
+    button.primary { background: #1e293b; border-color: #1e293b; color: #fff; }
+    button:disabled { opacity: 0.6; cursor: default; }
+    #message { margin-top: 12px; min-height: 18px; }
+    .ok { color: #166534; }
+    .error { color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <form id="job">
+    <label for="customer">Customer *</label>
+    <input id="customer" name="Customer" maxlength="100" required autofocus>
+
+    <div class="pair">
+      <div>
+        <label for="phone">Phone</label>
+        <input id="phone" name="Phone" type="tel">
+      </div>
+      <div>
+        <label for="jobType">Job type</label>
+        <select id="jobType" name="Job type">
+          <option value="">Not sure yet</option>
+          <? options.jobTypes.forEach(function (t) { ?><option><?= t ?></option><? }); ?>
+        </select>
+      </div>
+    </div>
+
+    <label for="address">Address</label>
+    <input id="address" name="Address">
+
+    <label for="description">What needs doing</label>
+    <textarea id="description" name="Description"></textarea>
+
+    <div class="pair">
+      <div>
+        <label for="status">Status</label>
+        <select id="status" name="Status">
+          <? options.statuses.forEach(function (s) { ?><option><?= s ?></option><? }); ?>
+        </select>
+      </div>
+      <div>
+        <label for="engineer">Engineer</label>
+        <select id="engineer" name="Engineer">
+          <option value="">Not assigned yet</option>
+          <? options.engineers.forEach(function (n) { ?><option><?= n ?></option><? }); ?>
+        </select>
+      </div>
+    </div>
+
+    <div class="pair">
+      <div>
+        <label for="value">Value £</label>
+        <input id="value" name="Value £" inputmode="decimal" placeholder="e.g. 250">
+      </div>
+      <div>
+        <label for="scheduled">Scheduled for</label>
+        <input id="scheduled" name="Scheduled" type="date">
+      </div>
+    </div>
+
+    <label for="notes">Notes</label>
+    <input id="notes" name="Notes">
+
+    <div class="buttons">
+      <button class="primary" id="save" type="submit">Add job</button>
+      <button type="button" onclick="google.script.host.close()">Close</button>
+    </div>
+    <div id="message" role="status"></div>
+  </form>
+
+  <script>
+    const form = document.getElementById('job');
+    const saveButton = document.getElementById('save');
+    const message = document.getElementById('message');
+
+    function show(text, kind) {
+      message.textContent = text;
+      message.className = kind;
+    }
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const data = {};
+      Array.prototype.forEach.call(form.elements, function (el) {
+        if (el.name) data[el.name] = el.value;
+      });
+      saveButton.disabled = true;
+      show('Saving…', '');
+      google.script.run
+        .withSuccessHandler(function (id) {
+          saveButton.disabled = false;
+          show('Added ' + id + ' for ' + data['Customer'] + '. Add another, or close.', 'ok');
+          form.reset();
+          document.getElementById('customer').focus();
+        })
+        .withFailureHandler(function (err) {
+          saveButton.disabled = false;
+          show(String(err.message || err).replace(/^Error:\s*/, ''), 'error');
+        })
+        .addJob(data);
+    });
+  </script>
+</body>
+</html>
